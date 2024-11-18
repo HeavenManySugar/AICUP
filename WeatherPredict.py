@@ -26,7 +26,7 @@ if __name__ == "__main__":
     csv_path = "processed_data.csv"
     # Load the test data
     data = pd.read_csv(csv_path)
-    y_pred = WeatherPredict("weather_model_pure.joblib", data)
+    y_pred = WeatherPredict("weather_model.joblib", data)
     from sklearn.metrics import mean_absolute_error, mean_squared_error
     import numpy as np
 

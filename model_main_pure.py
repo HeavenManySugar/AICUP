@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
-from WeatherPredict import WeatherPredict
+# from WeatherPredict import WeatherPredict
 
 # Load data
 csv_path = "processed_data.csv"
@@ -18,12 +18,12 @@ data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
 data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
 # Load weather data
-weather_model = "weather_model.joblib"
-weather_data = WeatherPredict(weather_model, data)
+# weather_model = "weather_model.joblib"
+# weather_data = WeatherPredict(weather_model, data)
 
 # Add the weather data to the processed data
-data["Sunlight(Lux)"] = weather_data[:, 0]
-data["Temperature(°C)"] = weather_data[:, 1]
+# data["Sunlight(Lux)"] = weather_data[:, 0]
+# data["Temperature(°C)"] = weather_data[:, 1]
 
 # Define features and target
 X = data[
