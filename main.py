@@ -48,14 +48,17 @@ def PowerPredict(main_model_path, weather_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
     y_pred = PowerPredict("main_model.joblib", "weather_model.joblib", data)
     y_pred = np.maximum(y_pred, 0)
 
     print(y_pred)
-    y_test = data["Power(mW)"]
+    processed_data = pd.read_csv("processed_data.csv")
+    y_test = processed_data.loc[processed_data["Serial"].isin(data["Serial"])][
+        "Power(mW)"
+    ]
     # Handle NaN values
     y_test = y_test.fillna(0)
     y_pred = np.nan_to_num(y_pred)
