@@ -59,6 +59,7 @@ if __name__ == "__main__":
     # Handle NaN values
     y_test = y_test.fillna(0)
     y_pred = np.nan_to_num(y_pred)
+    y_pred = np.round(y_pred, 2)
 
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
