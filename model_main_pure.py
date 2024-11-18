@@ -51,7 +51,7 @@ param_grid = {
     "n_estimators": [100, 200, 300],
 }
 
-xgboost_model = xgb.XGBRegressor(device="cuda", objective="reg:squarederror")
+xgboost_model = xgb.XGBRegressor(objective="reg:squarederror")
 
 grid_search = GridSearchCV(
     estimator=xgboost_model,
@@ -75,4 +75,4 @@ print(f"Root Mean Squared Error (RMSE): {rmse}")
 xgb.plot_importance(best_model)
 
 # Save the model
-joblib.dump(best_model, "main_model_pure.joblib")
+joblib.dump(best_model, "main_model.joblib")

@@ -5,7 +5,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
 from openWeather import openWeather
-import cupy as cp
 
 data = pd.read_csv("processed_data.csv")
 # csv_files = [f for f in os.listdir("ExampleTrainData(AVG)") if f.endswith(".csv")]
@@ -46,9 +45,8 @@ param_grid = {
     "n_estimators": [100, 200, 300],
 }
 
-X_train, y_train = cp.asarray(X_train).get(), cp.asarray(y_train).get()
 
-xgboost_model = xgb.XGBRegressor(device="cuda", objective="reg:squarederror")
+xgboost_model = xgb.XGBRegressor(objective="reg:squarederror")
 
 grid_search = GridSearchCV(
     estimator=xgboost_model,
