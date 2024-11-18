@@ -1,6 +1,6 @@
 import pandas as pd
 import xgboost as xgb
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
@@ -36,27 +36,29 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Hyperparameter tuning using GridSearchCV
-param_grid = {
+# Hyperparameter tuning using RandomizedSearchCV
+param_dist = {
     "colsample_bytree": [0.3, 0.7, 0.9],
     "learning_rate": [0.01, 0.05, 0.1, 0.2],
-    "max_depth": [4, 5, 6, 7],
+    "max_depth": [3, 5, 10],
     "alpha": [10, 20, 30],
     "n_estimators": [100, 200, 300],
 }
 
 xgboost_model = xgb.XGBRegressor(objective="reg:squarederror")
 
-grid_search = GridSearchCV(
+random_search = RandomizedSearchCV(
     estimator=xgboost_model,
-    param_grid=param_grid,
-    cv=3,
+    param_distributions=param_dist,
+    n_iter=100,
+    cv=5,
     scoring="neg_mean_absolute_error",
     verbose=1,
+    random_state=42,
 )
-grid_search.fit(X_train, y_train)
+random_search.fit(X_train, y_train)
 
-best_model = grid_search.best_estimator_
+best_model = random_search.best_estimator_
 
 y_pred = best_model.predict(X_test)
 
