@@ -13,33 +13,21 @@ def PowerPredict(main_model_path, weather_model_path, data):
     data.columns = ["Serial", "Power(mW)"]
 
     # Make predictions
-    data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
-    data["Month"] = data["Serial"].astype(str).str[4:6].astype(int)
-    data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
     data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
+    data["mmdd"] = data["Serial"].astype(str).str[4:8].astype(int)
     data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
-    data["Weekday"] = pd.to_datetime(data["Serial"].astype(str).str[:8]).dt.weekday
 
     weather_data = WeatherPredict(weather_model_path, data)
-    data["Pressure(hpa)"] = weather_data[:, 0]
-    data["WindSpeed(m/s)"] = weather_data[:, 1]
-    data["Temperature(°C)"] = weather_data[:, 2]
-    data["Sunlight(Lux)"] = weather_data[:, 3]
-    data["Humidity(%)"] = weather_data[:, 4]
+    data["Sunlight(Lux)"] = weather_data[:, 0]
+    data["Temperature(°C)"] = weather_data[:, 1]
 
     X = data[
         [
-            "Year",
-            "Month",
-            "Day",
-            "hhmm",
             "DeviceID",
-            "Weekday",
-            "Pressure(hpa)",
-            "WindSpeed(m/s)",
-            "Temperature(°C)",
             "Sunlight(Lux)",
-            "Humidity(%)",
+            "Temperature(°C)",
+            "hhmm",
+            "mmdd",
         ]
     ]
 

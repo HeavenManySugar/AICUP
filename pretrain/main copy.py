@@ -51,6 +51,7 @@ if __name__ == "__main__":
     # Handle NaN values
     y_test = y_test.fillna(0)
     y_pred = np.nan_to_num(y_pred)
+    y_pred = np.round(y_pred, 2)
 
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -59,7 +60,7 @@ if __name__ == "__main__":
 
     # Save predictions to CSV
     output = pd.DataFrame({"序號": data["Serial"], "答案": y_pred})
-    output.to_csv("predictions.csv", index=False, encoding="utf-8")
+    output.to_csv("predictions.csv", index=False, encoding="utf-8", header=False)
 
     # score = sum(abs(y_test - y_pred))
     score = sum(abs(y_test - y_pred))

@@ -9,13 +9,11 @@ def WeatherPredict(model_path, data):
     weather_model = joblib.load(model_path)
 
     # Make predictions
-    data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
-    data["Month"] = data["Serial"].astype(str).str[4:6].astype(int)
-    data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
+    data["mmdd"] = data["Serial"].astype(str).str[4:8].astype(int)
     data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
     data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
-    X = data[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
+    X = data[["mmdd", "hhmm", "DeviceID", *weather_columns]]
 
     y_pred = weather_model.predict(X)
 
@@ -26,18 +24,15 @@ if __name__ == "__main__":
     csv_path = "processed_data.csv"
     # Load the test data
     data = pd.read_csv(csv_path)
-    y_pred = WeatherPredict("weather_model.joblib", data)
+    y_pred = WeatherPredict("weather_model_pure.joblib", data)
     from sklearn.metrics import mean_absolute_error, mean_squared_error
     import numpy as np
 
     print(y_pred)
     y_test = data[
         [
-            "Pressure(hpa)",
-            "WindSpeed(m/s)",
-            "Temperature(°C)",
             "Sunlight(Lux)",
-            "Humidity(%)",
+            "Temperature(°C)",
         ]
     ]
     mae = mean_absolute_error(y_test, y_pred)

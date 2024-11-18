@@ -54,29 +54,13 @@ def openWeather(data):
         direction="nearest",
     )
     weather_columns = [
-        "PS01",
-        "PS02",
+        "SS01",
+        "CD11",
         "TX01",
-        "TD01",
+        "TS01",
         "RH01",
         "WD01",
-        "WD02",
-        "WD07",
-        "WD08",
         "PP01",
-        "PP02",
-        "SS01",
-        "GR01",
-        "VS01",
-        "UV01",
-        "CD11",
-        "TS01",
-        "TS02",
-        "TS03",
-        "TS04",
-        "TS05",
-        "TS06",
-        "TS07",
     ]
     existing_columns = [col for col in weather_columns if col in weather_data.columns]
     merged_data = merged_data[["yyyymmddhh"] + existing_columns]
