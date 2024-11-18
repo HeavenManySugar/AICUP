@@ -1,11 +1,13 @@
 import joblib
 import pandas as pd
-from WeatherPredict import WeatherPredict
+
+# from WeatherPredict import WeatherPredict
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from openWeather import openWeather
 
 
-def PowerPredict(main_model_path, weather_model_path, data):
+def PowerPredict(main_model_path, data):
     # Load the model from the file
     main_model = joblib.load(main_model_path)
 
@@ -20,12 +22,26 @@ def PowerPredict(main_model_path, weather_model_path, data):
     data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
     data["Weekday"] = pd.to_datetime(data["Serial"].astype(str).str[:8]).dt.weekday
 
-    weather_data = WeatherPredict(weather_model_path, data)
-    data["Pressure(hpa)"] = weather_data[:, 0]
-    data["WindSpeed(m/s)"] = weather_data[:, 1]
-    data["Temperature(°C)"] = weather_data[:, 2]
-    data["Sunlight(Lux)"] = weather_data[:, 3]
-    data["Humidity(%)"] = weather_data[:, 4]
+    # weather_data = WeatherPredict(weather_model_path, data)
+    # data["Pressure(hpa)"] = weather_data[:, 0]
+    # data["WindSpeed(m/s)"] = weather_data[:, 1]
+    # data["Temperature(°C)"] = weather_data[:, 2]
+    # data["Sunlight(Lux)"] = weather_data[:, 3]
+    # data["Humidity(%)"] = weather_data[:, 4]
+    humidity_model = "humidity_model.joblib"
+    pressure_model = "pressure_model.joblib"
+    sunlight_model = "sunlight_model.joblib"
+    temperature_model = "temperature_model.joblib"
+    wind_speed_model = "wind_speed_model.joblib"
+
+    data, weather_columns = openWeather(data)
+    X = data[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
+
+    data["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
+    data["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
+    data["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
+    data["Sunlight(Lux)_FIX"] = joblib.load(sunlight_model).predict(X)
+    data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
     X = data[
         [
@@ -38,7 +54,7 @@ def PowerPredict(main_model_path, weather_model_path, data):
             "Pressure(hpa)",
             "WindSpeed(m/s)",
             "Temperature(°C)",
-            "Sunlight(Lux)",
+            "Sunlight(Lux)_FIX",
             "Humidity(%)",
         ]
     ]
@@ -51,7 +67,7 @@ if __name__ == "__main__":
     csv_path = "upload(no answer).csv"
     data = pd.read_csv(csv_path)
 
-    y_pred = PowerPredict("main_model.joblib", "weather_model.joblib", data)
+    y_pred = PowerPredict("main_model.joblib", data)
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:

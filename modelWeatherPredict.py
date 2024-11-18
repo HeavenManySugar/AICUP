@@ -1,15 +1,13 @@
 import pandas as pd
 import xgboost as xgb
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
 from openWeather import openWeather
+import optuna
 
 data = pd.read_csv("processed_data.csv")
-# csv_files = [f for f in os.listdir("ExampleTrainData(AVG)") if f.endswith(".csv")]
-# dataframes = [pd.read_csv(os.path.join("ExampleTrainData(AVG)", f)) for f in csv_files]
-# data = pd.concat(dataframes, ignore_index=True)
 data, weather_columns = openWeather(data)
 print(data.head())
 print(data.columns)
@@ -20,14 +18,13 @@ data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
 data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
 data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
-
 X = data[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
 y = data[
     [
         "Pressure(hpa)",
         "WindSpeed(m/s)",
         "Temperature(°C)",
-        "Sunlight(Lux)",
+        "Sunlight(Lux)_FIX",
         "Humidity(%)",
     ]
 ]
@@ -36,27 +33,47 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Hyperparameter tuning using GridSearchCV
-param_grid = {
-    "colsample_bytree": [0.3, 0.7, 0.9],
-    "learning_rate": [0.01, 0.05, 0.1, 0.2],
-    "max_depth": [4, 5, 6, 7],
-    "alpha": [10, 20, 30],
-    "n_estimators": [100, 200, 300],
-}
+# Use a smaller subset of the training data for hyperparameter tuning
+X_train_sub = X_train.sample(frac=0.1, random_state=42)
+y_train_sub = y_train.loc[X_train_sub.index]
 
-xgboost_model = xgb.XGBRegressor(objective="reg:squarederror")
 
-grid_search = GridSearchCV(
-    estimator=xgboost_model,
-    param_grid=param_grid,
-    cv=3,
-    scoring="neg_mean_absolute_error",
-    verbose=1,
-)
-grid_search.fit(X_train, y_train)
+def objective(trial):
+    param = {
+        "max_depth": trial.suggest_int("max_depth", 6, 15),
+        "subsample": trial.suggest_float("subsample", 0.2, 1.0),
+        "n_estimators": trial.suggest_int("n_estimators", 500, 2000, step=100),
+        "eta": trial.suggest_float("eta", 1e-8, 1.0, log=True),
+        "alpha": trial.suggest_float("alpha", 1e-8, 1.0, log=True),
+        "lambda": trial.suggest_float("lambda", 1e-8, 1.0, log=True),
+        "gamma": trial.suggest_float("gamma", 1e-8, 1.0, log=True),
+        "min_child_weight": trial.suggest_int("min_child_weight", 2, 10),
+        "grow_policy": trial.suggest_categorical(
+            "grow_policy", ["depthwise", "lossguide"]
+        ),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.2, 1.0),
+        "tree_method": "hist",
+        "device": "cuda",
+    }
 
-best_model = grid_search.best_estimator_
+    model = xgb.XGBRegressor(**param)
+    model.fit(
+        X_train_sub,
+        y_train_sub,
+        eval_set=[(X_test, y_test)],
+        verbose=False,
+    )
+    y_pred = model.predict(X_test)
+    mae = mean_absolute_error(y_test, y_pred)
+    return mae
+
+
+study = optuna.create_study(direction="minimize")
+study.optimize(objective, n_trials=20)  # Reduce the number of trials
+
+best_params = study.best_params
+best_model = xgb.XGBRegressor(**best_params)
+best_model.fit(X_train, y_train)
 
 y_pred = best_model.predict(X_test)
 
@@ -69,4 +86,4 @@ print(f"Root Mean Squared Error (RMSE): {rmse}")
 xgb.plot_importance(best_model)
 
 # Save the model
-joblib.dump(best_model, "weather_model.joblib")
+joblib.dump(best_model, "weather_model.joblib", compress="zlib")
