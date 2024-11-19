@@ -5,7 +5,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 import joblib
 from WeatherPredict import WeatherPredict
-import os
 
 # Load data
 csv_path = "processed_data.csv"
@@ -88,4 +87,4 @@ print(f"Root Mean Squared Error (RMSE): {rmse}")
 xgb.plot_importance(best_model)
 
 # Save the model
-joblib.dump(best_model, "main_model.joblib")
+joblib.dump(best_model, "main_model2.joblib")

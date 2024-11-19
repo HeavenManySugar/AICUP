@@ -36,7 +36,7 @@ if __name__ == "__main__":
             "Pressure(hpa)",
             "WindSpeed(m/s)",
             "Temperature(°C)",
-            "Sunlight(Lux)",
+            "Sunlight(Lux)_FIX",
             "Humidity(%)",
         ]
     ]
