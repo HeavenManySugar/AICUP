@@ -19,8 +19,8 @@ if __name__ == "__main__":
     )
 
     y_pred = 0.5 * y_pred1 + 0.5 * y_pred2
-    y_pred = np.maximum(y_pred2, 0)
-    y_pred = np.round(y_pred2, 2)
+    y_pred = np.maximum(y_pred, 0)
+    y_pred = np.round(y_pred, 2)
 
     try:
         print(y_pred)
