@@ -10,9 +10,9 @@ csv_files = glob.glob("36_TrainingData/*.csv")
 df_list = [pd.read_csv(file) for file in csv_files]
 for i in range(len(df_list)):
     df_list[i]["DateTime"] = pd.to_datetime(df_list[i]["DateTime"])
-    df_list[i] = (
-        df_list[i].resample("10min", on="DateTime").mean().round(2).reset_index()
-    )
+    # df_list[i] = (
+    #     df_list[i].resample("10min", on="DateTime").mean().round(2).reset_index()
+    # )
 df = pd.concat(df_list, ignore_index=True)
 
 # Remove rows with any empty (NaN) values

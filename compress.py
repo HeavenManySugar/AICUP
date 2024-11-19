@@ -1,5 +1,5 @@
 import joblib
 
-model = joblib.load("pressure_model.joblib")
+model = joblib.load("sunlight_model.joblib")
 
-joblib.dump(model, "pressure_model.joblib", compress="zlib")
+joblib.dump(model, "sunlight_model.joblib", compress="lzma")
