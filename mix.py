@@ -13,16 +13,14 @@ if __name__ == "__main__":
     data.columns = ["Serial", "Power(mW)"]
 
     y_pred1 = main.PowerPredict("main_model.joblib", pd.read_csv(csv_path))
-    y_pred1 = np.maximum(y_pred1, 0)
-    y_pred1 = np.round(y_pred1, 2)
 
     y_pred2 = main2.PowerPredict(
         "main_model2.joblib", "weather_model.joblib", pd.read_csv(csv_path)
     )
-    y_pred2 = np.maximum(y_pred2, 0)
-    y_pred2 = np.round(y_pred2, 2)
 
     y_pred = 0.5 * y_pred1 + 0.5 * y_pred2
+    y_pred = np.maximum(y_pred2, 0)
+    y_pred = np.round(y_pred2, 2)
 
     try:
         print(y_pred)
