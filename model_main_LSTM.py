@@ -7,6 +7,20 @@ import pandas as pd
 import os
 import joblib
 from openWeather import openWeather
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+from datetime import datetime
+
+
+def scale(train_features, test_features):
+    scaler = MinMaxScaler()
+    data = pd.concat([train_features, test_features])
+    scaled_data = pd.DataFrame(scaler.fit_transform(data), columns=test_features.keys())
+    train_features = scaled_data.iloc[0 : train_features.shape[0]]
+    test_features = scaled_data.iloc[train_features.shape[0] :]
+
+    return train_features, test_features
+
 
 # 設定LSTM往前看的筆數和預測筆數
 LookBackNum = 12  # LSTM往前看的筆數
@@ -37,42 +51,41 @@ SourceData["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
 SourceData["Sunlight(Lux)_FIX"] = joblib.load(sunlight_model).predict(X)
 SourceData["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
-# 選擇要留下來的資料欄位(發電量)
-target = ["Power(mW)"]
-AllOutPut = SourceData[target].values
+selected_features = [
+    "Year",
+    "Month",
+    "Day",
+    "hhmm",
+    "DeviceID",
+    "Pressure(hpa)",
+    "WindSpeed(m/s)",
+    "Temperature(°C)",
+    "Sunlight(Lux)_FIX",
+    "Humidity(%)",
+]
 
-X_train = []
-y_train = []
+train_features = SourceData.drop("Power(mW)", axis=1)
+y = SourceData["Power(mW)"]
+X_test = SourceData
+X_test = X_test[selected_features]
+X_train = train_features[selected_features]
 
-# 設定每i-12筆資料(X_train)就對應到第i筆資料(y_train)
-for i in range(LookBackNum, len(AllOutPut)):
-    X_train.append(AllOutPut[i - LookBackNum : i, 0])
-    y_train.append(AllOutPut[i, 0])
+X_train, X_test = scale(X_train, X_test)
 
-X_train = np.array(X_train)
-y_train = np.array(y_train)
+X_train = X_train.values.reshape(X_train.shape[0], 1, X_train.shape[1])
+X_test = X_test.values.reshape(X_test.shape[0], 1, X_test.shape[1])
 
-# Reshaping
-X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+X_train, X_val, y_train, y_val = train_test_split(
+    X_train, y, test_size=0.2, random_state=333
+)
 
-# Define the model
-regressor = Sequential()
+model = Sequential()
+model.add(
+    LSTM(200, activation="tanh", input_shape=(X_train.shape[1], X_train.shape[2]))
+)
+model.add(Dense(1, activation="relu"))
+model.compile(loss="mse", optimizer="adam")
 
-regressor.add(LSTM(units=128, return_sequences=True, input_shape=(X_train.shape[1], 1)))
-regressor.add(Dropout(0.2))
-
-regressor.add(LSTM(units=64, return_sequences=True))
-regressor.add(Dropout(0.2))
-
-regressor.add(LSTM(units=32))
-regressor.add(Dropout(0.2))
-
-# Output layer
-regressor.add(Dense(units=1))
-
-# Compile the model
-optimizer = Adam(learning_rate=0.001)
-regressor.compile(optimizer=optimizer, loss="mean_squared_error")
 
 # Callbacks for early stopping and saving the best model
 early_stopping = EarlyStopping(
@@ -83,18 +96,18 @@ model_checkpoint = ModelCheckpoint(
 )
 
 # 開始訓練
-regressor.fit(
+model.fit(
     X_train,
     y_train,
-    epochs=100,
-    batch_size=128,
-    validation_split=0.2,
+    epochs=1100,
+    batch_size=100,
+    validation_data=(X_val, y_val),
+    verbose=2,
+    shuffle=False,
     callbacks=[early_stopping, model_checkpoint],
 )
 
 # 保存模型
-from datetime import datetime
-
 NowDateTime = datetime.now().strftime("%Y-%m-%dT%H_%M_%SZ")
-regressor.save("WheatherLSTM_" + NowDateTime + ".h5")
+model.save("WheatherLSTM_" + NowDateTime + ".h5")
 print("Model Saved")
