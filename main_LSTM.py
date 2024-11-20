@@ -4,64 +4,74 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import joblib
+from openWeather import openWeather
 
-# 設定LSTM往前看的筆數和預測筆數
-LookBackNum = 12  # LSTM往前看的筆數
-ForecastNum = 48  # 預測筆數
 
 # 載入模型
-regressor = load_model("WheatherLSTM_2024-11-20T06_57_19Z.h5")
+regressor = load_model("WheatherLSTM_2024-11-20T14_35_32Z.h5")
 
 # 載入測試資料
 DataName = "upload.csv"
 SourceData = pd.read_csv(DataName, encoding="utf-8")
-target = ["序號"]
-EXquestion = SourceData[target].values
+target = "序號"
 
-inputs = []  # 存放參考資料
+# rename 序號 to Serial
+SourceData.rename(columns={target: "Serial"}, inplace=True)
+
 PredictOutput = []  # 存放預測值
 
-count = 0
-while count < len(EXquestion):
-    print("count : ", count)
-    LocationCode = int(EXquestion[count])
-    strLocationCode = str(LocationCode)[-2:]
-    if LocationCode < 10:
-        strLocationCode = "0" + LocationCode
 
-    DataName = "processed_data.csv"
-    SourceData = pd.read_csv(DataName, encoding="utf-8")
-    ReferTitle = SourceData[["Serial"]].values
-    ReferData = SourceData[["Power(mW)"]].values
+SourceData["Year"] = SourceData["Serial"].astype(str).str[:4].astype(int)
+SourceData["Month"] = SourceData["Serial"].astype(str).str[4:6].astype(int)
+SourceData["Day"] = SourceData["Serial"].astype(str).str[6:8].astype(int)
+SourceData["hhmm"] = SourceData["Serial"].astype(str).str[8:12].astype(int)
+SourceData["DeviceID"] = SourceData["Serial"].astype(str).str[12:14].astype(int)
 
-    inputs = []  # 重置存放參考資料
+SourceData, weather_columns = openWeather(SourceData)
+X = SourceData[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
 
-    # 找到相同的一天，把12個資料都加進inputs
-    for DaysCount in range(len(ReferTitle)):
-        if str(int(ReferTitle[DaysCount]))[:8] == str(int(EXquestion[count]))[:8]:
-            inputs = np.append(inputs, ReferData[DaysCount])
+humidity_model = "humidity_model.joblib"
+pressure_model = "pressure_model.joblib"
+sunlight_model = "sunlight_model.joblib"
+temperature_model = "temperature_model.joblib"
+wind_speed_model = "wind_speed_model.joblib"
 
-    # 用迴圈不斷使新的預測值塞入參考資料，並預測下一筆資料
-    for i in range(ForecastNum):
-        # print(i)
 
-        # 將新的預測值加入參考資料(用自己的預測值往前看)
-        if i > 0:
-            inputs = np.append(inputs, PredictOutput[i - 1])
+SourceData["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
+SourceData["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
+SourceData["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
+SourceData["Sunlight(Lux)_FIX"] = joblib.load(sunlight_model).predict(X)
+SourceData["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
-        # 切出新的參考資料12筆(往前看12筆)
-        X_test = []
-        X_test.append(inputs[0 + i : LookBackNum + i])
+selected_features = [
+    "Year",
+    "Month",
+    "Day",
+    "hhmm",
+    "DeviceID",
+    "Pressure(hpa)",
+    "WindSpeed(m/s)",
+    "Temperature(°C)",
+    "Sunlight(Lux)_FIX",
+    "Humidity(%)",
+]
 
-        # Reshaping
-        NewTest = np.array(X_test)
-        NewTest = np.reshape(NewTest, (NewTest.shape[0], NewTest.shape[1], 1))
-        predicted = regressor.predict(NewTest)
-        PredictOutput.append(round(predicted[0, 0], 2))
+# 取得參考資料
+X = SourceData[selected_features]
 
-    # 每次預測都要預測48個，因此加48個會切到下一天
-    # 0~47,48~95,96~143...
-    count += 48
+# 將參考資料轉換為3D張量
+X = X.values.reshape(X.shape[0], 1, X.shape[1])
+
+# 預測
+y_pred = regressor.predict(X)
+PredictOutput = y_pred.flatten()
+
+# 將預測結果轉換為陣列
+PredictOutput = np.array(PredictOutput)
+
+# 定義 EXquestion 為序號的值
+EXquestion = SourceData["Serial"].values.reshape(-1, 1)
 
 # 寫預測結果寫成新的CSV檔案
 # 將陣列轉換為 DataFrame
@@ -69,6 +79,8 @@ df = pd.DataFrame({"序號": EXquestion.flatten(), "答案": PredictOutput})
 
 try:
     actual_values = []
+    DataName = "processed_data.csv"
+    SourceData = pd.read_csv(DataName, encoding="utf-8")
     for question in EXquestion:
         actual_value = SourceData.loc[
             SourceData["Serial"] == question[0], "Power(mW)"

@@ -99,7 +99,7 @@ model_checkpoint = ModelCheckpoint(
 model.fit(
     X_train,
     y_train,
-    epochs=1100,
+    epochs=20,
     batch_size=100,
     validation_data=(X_val, y_val),
     verbose=2,
