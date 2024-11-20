@@ -7,7 +7,7 @@ import joblib
 from openWeather import openWeather
 import optuna
 
-data = pd.read_csv("processed_data.csv")
+data = pd.read_csv("processed_data_1min.csv")
 data, weather_columns = openWeather(data)
 print(data.head())
 print(data.columns)
@@ -18,11 +18,17 @@ data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
 data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
 data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
+max_sunlight_value = 117758.2
+# 丟掉超過max_sunlight_value的資料
+mask = data["Sunlight(Lux)"] < max_sunlight_value
+data = data[mask]
+
+
 X = data[
     [
-        "Year",
+        # "Year",
         "Month",
-        "Day",
+        # "Day",
         "hhmm",
         "DeviceID",
         "WindSpeed(m/s)",
@@ -62,7 +68,7 @@ def objective(trial):
         ),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.2, 1.0),
         "tree_method": "hist",
-        "device": "cuda",
+        # "device": "cuda",
     }
 
     model = xgb.XGBRegressor(**param)
