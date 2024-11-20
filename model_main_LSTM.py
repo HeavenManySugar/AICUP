@@ -96,5 +96,5 @@ regressor.fit(
 from datetime import datetime
 
 NowDateTime = datetime.now().strftime("%Y-%m-%dT%H_%M_%SZ")
-regressor.save("WheatherLSTM_" + NowDateTime + ".keras")
+regressor.save("WheatherLSTM_" + NowDateTime + ".h5")
 print("Model Saved")

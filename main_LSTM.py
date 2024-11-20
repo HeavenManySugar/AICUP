@@ -1,18 +1,19 @@
 from tensorflow.keras.models import load_model
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # 設定LSTM往前看的筆數和預測筆數
 LookBackNum = 12  # LSTM往前看的筆數
 ForecastNum = 48  # 預測筆數
 
 # 載入模型
-regressor = load_model("WheatherLSTM_2024-11-19T17_05_16Z.keras")
+regressor = load_model("WheatherLSTM_2024-11-20T06_57_19Z.h5")
 
 # 載入測試資料
-DataName = "upload(no answer).csv"
+DataName = "upload.csv"
 SourceData = pd.read_csv(DataName, encoding="utf-8")
 target = ["序號"]
 EXquestion = SourceData[target].values
@@ -74,13 +75,53 @@ try:
         ].values
         if len(actual_value) > 0:
             actual_values.append(actual_value[0])
-    mae = mean_absolute_error(actual_values, PredictOutput)
-    rmse = np.sqrt(mean_squared_error(actual_values, PredictOutput))
-    print(f"Mean Absolute Error (MAE): {mae}")
-    print(f"Root Mean Squared Error (RMSE): {rmse}")
 
-    score = sum(abs(np.array(actual_values) - np.array(PredictOutput)))
+    mse = mean_squared_error(actual_values, PredictOutput)
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(actual_values, PredictOutput)
+    r2 = r2_score(actual_values, PredictOutput)
+    print(f"均方誤差(MSE): {mse:.4f}")
+    print(f"均方根誤差(RMSE): {rmse:.4f}")
+    print(f"平均絕對誤差(MAE): {mae:.4f}")
+    print(f"R²分數: {r2:.4f}")
+    # R²解讀：
+
+    # 1.0：完美預測
+    # 0：模型只是預測平均值
+    # 負值：模型比單純預測平均值還差
+
+    score = sum(abs(actual_values - PredictOutput))
     print(f"Score: {score}")
+
+    PredictOutput = np.array(PredictOutput)
+    actual_values = np.array(actual_values)
+    errors = PredictOutput - actual_values
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(
+        actual_values, PredictOutput, c=np.abs(errors), cmap="viridis", alpha=0.7
+    )
+    plt.colorbar(label="Absolute Error")
+    plt.xlabel("Actual Power (mW)")
+    plt.ylabel("Predicted Power (mW)")
+    plt.title("Actual vs Predicted Power with Error Visualization")
+    plt.plot(
+        [actual_values.min(), actual_values.max()],
+        [actual_values.min(), actual_values.max()],
+        "r--",
+        lw=2,
+    )
+    plt.tight_layout()
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(actual_values, errors, alpha=0.7)
+    plt.axhline(y=0, color="r", linestyle="--")
+    plt.xlabel("Actual Power (mW)")
+    plt.ylabel("Errors")
+    plt.title("Residual Plot")
+    plt.tight_layout()
+    plt.show()
+
 except:
     pass
 
