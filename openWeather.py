@@ -112,6 +112,17 @@ def openWeather(data):
     for col in existing_columns:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
+    # 如果DeviceID(1,14)有缺失值，用DeviceID(15,17)的值填充
+    for col in existing_columns:
+        result_data.loc[
+            result_data["DeviceID"].between(1, 14) & result_data[col].isnull(), col
+        ] = result_data.loc[
+            result_data["DeviceID"].between(15, 17) & ~result_data[col].isnull(), col
+        ].values[0]
+
+    # 排序
+    result_data = result_data.sort_values(["yyyymmddhh"]).reset_index(drop=True)
+
     return result_data, weather_columns
 
 
@@ -121,3 +132,5 @@ if __name__ == "__main__":
     print(result_data.head())
     print(result_data.columns)
     print(result_data[result_data["DeviceID"].between(15, 17)].head())
+    # 輸出csv
+    result_data.to_csv("open_weather.csv", index=False)
