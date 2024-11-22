@@ -62,6 +62,7 @@ param_grid = {
     "max_depth": [4, 5, 6, 7],
     "alpha": [10, 20, 30],
     "n_estimators": [100, 200, 300],
+    "device": ["cuda"],
 }
 
 xgboost_model = xgb.XGBRegressor(objective="reg:squarederror")
