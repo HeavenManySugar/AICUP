@@ -51,14 +51,20 @@ power_valid = power[mask]
 
 model = joblib.load("FIX_sunlight_model.joblib")
 data = df.copy()
+data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
 data["Month"] = data["Serial"].astype(str).str[4:6].astype(int)
-data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
+data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
+data["Hour"] = data["Serial"].astype(str).str[8:10].astype(int)
+data["Minute"] = data["Serial"].astype(str).str[10:12].astype(int)
 data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
 X = data[
     [
+        "Year",
         "Month",
-        "hhmm",
+        "Day",
+        "Hour",
+        "Minute",
         "DeviceID",
         "WindSpeed(m/s)",
         "Pressure(hpa)",
