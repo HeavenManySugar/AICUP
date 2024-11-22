@@ -108,13 +108,14 @@ def openWeather(data):
         col for col in weather_columns if col in weather_data_72T250.columns
     ]
     for col in existing_columns_72T250:
-        result_data.loc[result_data["DeviceID"] & result_data[col].isnull(), col] = (
-            weather_data_72T250.loc[
-                weather_data_72T250["yyyymmddhh"]
-                == result_data.loc[result_data["DeviceID"], "yyyymmddhh"].values[0],
-                col,
-            ].values[0]
+        merged_data = pd.merge_asof(
+            result_data[result_data[col].isnull()].sort_values("yyyymmddhh"),
+            weather_data_72T250.sort_values("yyyymmddhh"),
+            on="yyyymmddhh",
+            direction="nearest",
+            suffixes=("", "_72T250"),
         )
+        result_data.loc[result_data[col].isnull(), col] = merged_data[col + "_72T250"]
 
     # 如果DeviceID(1,14)有缺失值，用DeviceID(15,17)的值填充
     for col in existing_columns_466990:
@@ -132,6 +133,7 @@ def openWeather(data):
 
 if __name__ == "__main__":
     data = pd.read_csv("processed_data.csv")
+    # data.columns = ["Serial", "Power(mW)"]
     result_data = openWeather(data)[0]
     print(result_data.head())
     print(result_data.columns)
