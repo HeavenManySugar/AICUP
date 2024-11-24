@@ -1,6 +1,7 @@
 import os
 from io import StringIO
 import pandas as pd
+import numpy as np
 
 
 def _openWeatherCSV(csv_dir):
@@ -54,15 +55,29 @@ def openWeather(data):
         direction="nearest",
     )
     weather_columns = [
-        "PS02",
-        "TX01",
+        # "PS01",
+        # "PS02",
+        # "TX01",
+        # "TD01",
         "RH01",
         "WD01",
         "WD02",
-        "PP01",
-        "PP02",
+        "WD07",
+        "WD08",
+        # "PP01",
+        # "PP02",
+        "SS01",
         "GR01",
-        "UV01",
+        # "VS01",
+        # "UV01",
+        # "CD11",
+        "TS01",
+        # "TS02",
+        # "TS03",
+        "TS04",
+        # "TS05",
+        "TS06",
+        # "TS07",
     ]
     existing_columns_C0Z100 = [
         col for col in weather_columns if col in weather_data_C0Z100.columns
@@ -107,6 +122,9 @@ def openWeather(data):
     existing_columns_72T250 = [
         col for col in weather_columns if col in weather_data_72T250.columns
     ]
+    # Replace "None" with np.nan
+    weather_data_72T250 = weather_data_72T250.replace(["None", "     None"], np.nan)
+
     for col in existing_columns_72T250:
         merged_data = pd.merge_asof(
             result_data[result_data[col].isnull()].sort_values("yyyymmddhh"),
@@ -115,7 +133,7 @@ def openWeather(data):
             direction="nearest",
             suffixes=("", "_72T250"),
         )
-        result_data.loc[result_data[col].isnull(), col] = merged_data[col + "_72T250"]
+        result_data.loc[result_data[col].isnull(), col] = pd.to_numeric(merged_data[col + "_72T250"], errors='coerce')
 
     # 如果DeviceID(1,14)有缺失值，用DeviceID(15,17)的值填充
     for col in existing_columns_466990:
@@ -127,6 +145,10 @@ def openWeather(data):
 
     # 排序
     result_data = result_data.sort_values(["yyyymmddhh"]).reset_index(drop=True)
+
+    # 處理缺失值
+    for col in weather_columns:
+        result_data[col] = result_data[col].ffill()
 
     return result_data, weather_columns
 
