@@ -38,6 +38,7 @@ def openWeather(data):
         + data["Serial"].astype(str).str[8:10]
     )
     data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
+    data["original_index"] = data.index
 
     weather_data_C0Z100 = _openWeatherCSV("C0Z100")
     weather_data_C0Z100 = weather_data_C0Z100.set_index("yyyymmddhh")
@@ -82,23 +83,10 @@ def openWeather(data):
     for col in existing_columns_466990:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
-    # weather_data_72T250 = _openWeatherCSV("72T250")
-    # weather_data_72T250 = weather_data_72T250.set_index("yyyymmddhh")
-    # weather_data_72T250 = weather_data_72T250.add_suffix("_72T250")
-    # weather_data_72T250.drop(columns=["# stno_72T250"], inplace=True)
-    # # find the closest yyyymmddhh to merge
-    # result_data = pd.merge_asof(
-    #     result_data.sort_values("yyyymmddhh"),
-    #     weather_data_72T250.sort_index(),
-    #     on="yyyymmddhh",
-    #     direction="nearest",
-    # )
-    # existing_columns_72T250 = weather_data_72T250.columns
-    # weather_columns = weather_columns + existing_columns_72T250.tolist()
-
-    # # Convert columns to numeric types
-    # for col in existing_columns_72T250:
-    #     result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
+    # Restore the original order
+    result_data = result_data.sort_values("original_index").drop(
+        columns=["original_index"]
+    )
 
     return result_data, weather_columns
 
