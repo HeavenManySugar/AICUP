@@ -15,10 +15,67 @@ print(data.columns)
 data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
 data["Month"] = data["Serial"].astype(str).str[4:6].astype(int)
 data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
-data["hhmm"] = data["Serial"].astype(str).str[8:12].astype(int)
 data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
-X = data[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
+data["Datetime"] = pd.to_datetime(
+    data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
+)
+data["day_of_year"] = [i.dayofyear for i in data["Datetime"]]
+data["hour"] = [i.hour for i in data["Datetime"]]
+data["minute"] = [i.minute for i in data["Datetime"]]
+
+# Filter data to get the rows where the time is 08:50
+data_850 = data[(data["hour"] == 8) & (data["minute"] == 50)]
+
+# Select only the required columns
+data_850 = data_850[
+    [
+        "DeviceID",
+        "day_of_year",
+        "Pressure(hpa)",
+        "WindSpeed(m/s)",
+        "Temperature(°C)",
+        "Sunlight(Lux)",
+        "Humidity(%)",
+    ]
+]
+
+# Rename columns to indicate they are from 08:50
+data_850.columns = [
+    "DeviceID",
+    "day_of_year",
+    "Pressure_850",
+    "WindSpeed_850",
+    "Temperature_850",
+    "Sunlight_850",
+    "Humidity_850",
+]
+
+data = pd.merge(
+    data,
+    data_850,
+    on=["DeviceID", "day_of_year"],
+    how="left",
+    suffixes=("", "_duplicate"),
+)
+
+X = data[
+    [
+        # "Year",
+        # "Month",
+        # "Day",
+        "hour",
+        "minute",
+        "DeviceID",
+        # "day_of_year",
+        *weather_columns,
+        "Pressure_850",
+        "WindSpeed_850",
+        "Temperature_850",
+        "Sunlight_850",
+        "Humidity_850",
+    ]
+]
 y = data[
     [
         "Temperature(°C)",

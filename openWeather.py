@@ -40,115 +40,65 @@ def openWeather(data):
     data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
     weather_data_C0Z100 = _openWeatherCSV("C0Z100")
-
+    weather_data_C0Z100 = weather_data_C0Z100.set_index("yyyymmddhh")
     # ensure both yyyymmddhh columns are of the same type
     data["yyyymmddhh"] = pd.to_numeric(data["yyyymmddhh"], errors="coerce").astype(
         "Int64"
     )
+    weather_data_C0Z100 = weather_data_C0Z100.add_suffix("_C0Z100")
+    weather_data_C0Z100.drop(columns=["# stno_C0Z100"], inplace=True)
 
     # find the closest yyyymmddhh to merge
-    filtered_data = data[data["DeviceID"].between(1, 14)]
-    merged_data = pd.merge_asof(
-        filtered_data.sort_values("yyyymmddhh"),
-        weather_data_C0Z100.sort_values("yyyymmddhh"),
+    result_data = pd.merge_asof(
+        data.sort_values("yyyymmddhh"),
+        weather_data_C0Z100.sort_index(),
         on="yyyymmddhh",
         direction="nearest",
     )
-    weather_columns = [
-        "PS01",
-        "PS02",
-        "TX01",
-        "TD01",
-        "RH01",
-        "WD01",
-        "WD02",
-        "WD07",
-        "WD08",
-        "PP01",
-        "PP02",
-        "SS01",
-        "GR01",
-        "VS01",
-        "UV01",
-        "CD11",
-        "TS01",
-        "TS02",
-        "TS03",
-        "TS04",
-        "TS05",
-        "TS06",
-        "TS07",
-    ]
-    existing_columns_C0Z100 = [
-        col for col in weather_columns if col in weather_data_C0Z100.columns
-    ]
-    merged_data = merged_data[["yyyymmddhh"] + existing_columns_C0Z100]
-    result_data = data.copy()
-    for col in existing_columns_C0Z100:
-        result_data.loc[result_data["DeviceID"].between(1, 14), col] = merged_data[
-            col
-        ].values
+    weather_columns = weather_data_C0Z100.columns
 
+    existing_columns_C0Z100 = weather_data_C0Z100.columns
+    print(existing_columns_C0Z100)
     # Convert columns to numeric types
     for col in existing_columns_C0Z100:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
     # find 466990
     weather_data_466990 = _openWeatherCSV("466990")
+    weather_data_466990 = weather_data_466990.set_index("yyyymmddhh")
+    weather_data_466990 = weather_data_466990.add_suffix("_466990")
+    weather_data_466990.drop(columns=["# stno_466990"], inplace=True)
     # find the closest yyyymmddhh to merge
-    filtered_data = data[data["DeviceID"].between(15, 17)]
-    merged_data = pd.merge_asof(
-        filtered_data.sort_values("yyyymmddhh"),
-        weather_data_466990.sort_values("yyyymmddhh"),
+    result_data = pd.merge_asof(
+        result_data.sort_values("yyyymmddhh"),
+        weather_data_466990.sort_index(),
         on="yyyymmddhh",
         direction="nearest",
     )
-    existing_columns_466990 = [
-        col for col in weather_columns if col in weather_data_466990.columns
-    ]
-    merged_data = merged_data[["yyyymmddhh"] + existing_columns_466990]
-    result_data = data.copy()
-    for col in existing_columns_466990:
-        result_data.loc[result_data["DeviceID"].between(15, 17), col] = merged_data[
-            col
-        ].values
+    existing_columns_466990 = weather_data_466990.columns
+    weather_columns = weather_columns.tolist() + existing_columns_466990.tolist()
 
     # Convert columns to numeric types
     for col in existing_columns_466990:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
-    # # 如果有缺失值，用72T250填充
     # weather_data_72T250 = _openWeatherCSV("72T250")
-    # existing_columns_72T250 = [
-    #     col for col in weather_columns if col in weather_data_72T250.columns
-    # ]
-    # # Replace "None" with np.nan
-    # weather_data_72T250 = weather_data_72T250.replace(["None", "     None"], np.nan)
+    # weather_data_72T250 = weather_data_72T250.set_index("yyyymmddhh")
+    # weather_data_72T250 = weather_data_72T250.add_suffix("_72T250")
+    # weather_data_72T250.drop(columns=["# stno_72T250"], inplace=True)
+    # # find the closest yyyymmddhh to merge
+    # result_data = pd.merge_asof(
+    #     result_data.sort_values("yyyymmddhh"),
+    #     weather_data_72T250.sort_index(),
+    #     on="yyyymmddhh",
+    #     direction="nearest",
+    # )
+    # existing_columns_72T250 = weather_data_72T250.columns
+    # weather_columns = weather_columns + existing_columns_72T250.tolist()
 
+    # # Convert columns to numeric types
     # for col in existing_columns_72T250:
-    #     merged_data = pd.merge_asof(
-    #         result_data[result_data[col].isnull()].sort_values("yyyymmddhh"),
-    #         weather_data_72T250.sort_values("yyyymmddhh"),
-    #         on="yyyymmddhh",
-    #         direction="nearest",
-    #         suffixes=("", "_72T250"),
-    #     )
-    #     result_data.loc[result_data[col].isnull(), col] = pd.to_numeric(merged_data[col + "_72T250"], errors='coerce')
-
-    # # 如果DeviceID(1,14)有缺失值，用DeviceID(15,17)的值填充
-    # for col in existing_columns_466990:
-    #     result_data.loc[
-    #         result_data["DeviceID"].between(1, 14) & result_data[col].isnull(), col
-    #     ] = result_data.loc[
-    #         result_data["DeviceID"].between(15, 17) & ~result_data[col].isnull(), col
-    #     ].values[0]
-
-    # # 排序
-    # result_data = result_data.sort_values(["yyyymmddhh"]).reset_index(drop=True)
-
-    # # 處理缺失值
-    # for col in weather_columns:
-    #     result_data[col] = result_data[col].ffill()
+    #     result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
     return result_data, weather_columns
 
