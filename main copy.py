@@ -12,7 +12,7 @@ def PowerPredict(main_model_path, data):
     main_model = joblib.load(main_model_path)
 
     # rename columns
-    data.columns = ["Serial", "Power(mW)"]
+    # data.columns = ["Serial", "Power(mW)"]
 
     # Make predictions
     data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
@@ -124,42 +124,30 @@ def PowerPredict(main_model_path, data):
         ]
     ].to_csv("Pweather_data.csv", index=False)
     # Calculate MAE for predicted weather data
-    # weather_columns = [
-    #     "Pressure(hpa)",
-    #     "WindSpeed(m/s)",
-    #     "Temperature(°C)",
-    #     "Sunlight(Lux)",
-    #     "Humidity(%)",
-    # ]
+    weather_columns = [
+        "Pressure(hpa)",
+        "WindSpeed(m/s)",
+        "Temperature(°C)",
+        "Sunlight(Lux)",
+        "Humidity(%)",
+    ]
 
-    # mae_weather = {}
-    # for column in weather_columns:
-    #     original = SourceData.loc[SourceData["Serial"].isin(data["Serial"]), column]
-    #     predicted = data[column]
-    #     mae_weather[column] = mean_absolute_error(original, predicted)
-    #     print(f"Mean Absolute Error for {column}: {mae_weather[column]}")
-    #     print(f"誤差 for {column}: {mae_weather[column]/original.max()}")
+    mae_weather = {}
+    for column in weather_columns:
+        original = SourceData.loc[SourceData["Serial"].isin(data["Serial"]), column]
+        predicted = data[column]
+        mae_weather[column] = mean_absolute_error(original, predicted)
+        print(f"Mean Absolute Error for {column}: {mae_weather[column]}")
+        print(f"誤差 for {column}: {mae_weather[column]/original.max()}")
 
     X = data[
         [
-            # "Year",
-            # "Month",
-            # "Day",
-            "hour",
-            "minute",
-            "DeviceID",
-            # "day_of_year",
+            # "DeviceID",
             "Pressure(hpa)",
             "WindSpeed(m/s)",
             "Temperature(°C)",
             "Sunlight(Lux)",
             "Humidity(%)",
-            *weather_columns,
-            "Pressure_850",
-            "WindSpeed_850",
-            "Temperature_850",
-            "Sunlight_850",
-            "Humidity_850",
         ]
     ]
 
@@ -168,7 +156,7 @@ def PowerPredict(main_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "processed_data.csv"
     data = pd.read_csv(csv_path)
 
     y_pred = PowerPredict("main_model.joblib", data)

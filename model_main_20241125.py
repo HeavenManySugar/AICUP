@@ -17,43 +17,28 @@ data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 test_csv_path = "upload.csv"
 test_data = pd.read_csv(test_csv_path)
 
-# 從data找出對應的Serial做成新的dataframe
-test_data = test_data.merge(
-    data, left_on="序號", right_on="Serial", suffixes=("", "_drop")
-)
-test_data.drop(
-    [col for col in test_data.columns if "drop" in col], axis=1, inplace=True
-)
-data = data[~data["Serial"].isin(test_data["Serial"])]
-
 # Define features and target
-X_train = data[
+X = data[
     [
-        # "DeviceID",
-        # "Pressure(hpa)",
-        # "WindSpeed(m/s)",
-        # "Temperature(°C)",
+        "DeviceID",
+        "Pressure(hpa)",
+        "WindSpeed(m/s)",
+        "Temperature(°C)",
         "Sunlight(Lux)",
-        # "Humidity(%)",
+        "Humidity(%)",
     ]
 ]
-y_train = data["Power(mW)"]
+y = data["Power(mW)"]
 
-X_test = test_data[
-    [
-        # "DeviceID",
-        # "Pressure(hpa)",
-        # "WindSpeed(m/s)",
-        # "Temperature(°C)",
-        "Sunlight(Lux)",
-        # "Humidity(%)",
-    ]
-]
-y_test = test_data["Power(mW)"]
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
 
 # Use a smaller subset of the training data for hyperparameter tuning
-# X_train_sub = X_train.sample(frac=0.1, random_state=42)
-# y_train_sub = y_train.loc[X_train_sub.index]
+X_train_sub = X_train.sample(frac=0.1, random_state=42)
+y_train_sub = y_train.loc[X_train_sub.index]
 
 
 def objective(trial):

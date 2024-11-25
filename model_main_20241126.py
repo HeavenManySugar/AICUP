@@ -96,11 +96,11 @@ X = data[
         "Humidity_850",
     ]
 ]
-data["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
-data["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
-data["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
-data["Sunlight(Lux)"] = joblib.load(sunlight_model).predict(X)
-data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
+# data["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
+# data["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
+# data["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
+# data["Sunlight(Lux)"] = joblib.load(sunlight_model).predict(X)
+# data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
 print(data.head())
 
@@ -199,4 +199,4 @@ print(f"Root Mean Squared Error (RMSE): {rmse}")
 xgb.plot_importance(best_model)
 
 # Save the model
-joblib.dump(best_model, "main_model.joblib")
+joblib.dump(best_model, "main_model_origin.joblib")
