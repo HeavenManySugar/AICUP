@@ -42,7 +42,7 @@ X = data[["Year", "Month", "Day", "hhmm", "DeviceID", *weather_columns]]
 data["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
 data["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
 data["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
-data["Sunlight(Lux)_FIX"] = joblib.load(sunlight_model).predict(X)
+data["Sunlight(Lux)"] = joblib.load(sunlight_model).predict(X)
 data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
 # Define features and target
@@ -57,7 +57,7 @@ X = data[
         "Pressure(hpa)",
         "WindSpeed(m/s)",
         "Temperature(°C)",
-        "Sunlight(Lux)_FIX",
+        "Sunlight(Lux)",
         "Humidity(%)",
     ]
 ]
@@ -75,18 +75,18 @@ y_train_sub = y_train.loc[X_train_sub.index]
 
 def objective(trial):
     param = {
-        "max_depth": trial.suggest_int("max_depth", 6, 15),
-        "subsample": trial.suggest_float("subsample", 0.2, 1.0),
-        "n_estimators": trial.suggest_int("n_estimators", 500, 2000, step=100),
-        "eta": trial.suggest_float("eta", 1e-8, 1.0, log=True),
-        "alpha": trial.suggest_float("alpha", 1e-8, 1.0, log=True),
-        "lambda": trial.suggest_float("lambda", 1e-8, 1.0, log=True),
-        "gamma": trial.suggest_float("gamma", 1e-8, 1.0, log=True),
-        "min_child_weight": trial.suggest_int("min_child_weight", 2, 10),
+        "max_depth": trial.suggest_int("max_depth", 3, 10),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "n_estimators": trial.suggest_int("n_estimators", 100, 1000),
+        "eta": trial.suggest_float("eta", 0.01, 0.3, log=True),
+        "alpha": trial.suggest_float("alpha", 0, 10),
+        "lambda": trial.suggest_float("lambda", 0, 10),
+        "gamma": trial.suggest_float("gamma", 0, 5),
+        "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
         "grow_policy": trial.suggest_categorical(
             "grow_policy", ["depthwise", "lossguide"]
         ),
-        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.2, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.3, 1.0),
         "tree_method": "hist",
         "device": "cuda",
     }

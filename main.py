@@ -40,7 +40,7 @@ def PowerPredict(main_model_path, data):
     data["Pressure(hpa)"] = joblib.load(pressure_model).predict(X)
     data["WindSpeed(m/s)"] = joblib.load(wind_speed_model).predict(X)
     data["Temperature(°C)"] = joblib.load(temperature_model).predict(X)
-    data["Sunlight(Lux)_FIX"] = joblib.load(sunlight_model).predict(X)
+    data["Sunlight(Lux)"] = joblib.load(sunlight_model).predict(X)
     data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
     X = data[
@@ -54,7 +54,7 @@ def PowerPredict(main_model_path, data):
             "Pressure(hpa)",
             "WindSpeed(m/s)",
             "Temperature(°C)",
-            "Sunlight(Lux)_FIX",
+            "Sunlight(Lux)",
             "Humidity(%)",
         ]
     ]
