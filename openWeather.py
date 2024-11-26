@@ -2,6 +2,7 @@ import os
 from io import StringIO
 import pandas as pd
 import numpy as np
+from C0Z100_GloblRad import loadC0Z100_GloblRad
 
 
 def _openWeatherCSV(csv_dir):
@@ -46,8 +47,13 @@ def openWeather(data):
     data["yyyymmddhh"] = pd.to_numeric(data["yyyymmddhh"], errors="coerce").astype(
         "Int64"
     )
+    weather_data_C0Z100 = pd.merge(
+        weather_data_C0Z100, loadC0Z100_GloblRad(), left_index=True, right_index=True
+    )
+    weather_data_C0Z100.drop(
+        columns=["# stno", "PS01", "RH01", "WD01", "WD08", "PP01"], inplace=True
+    )
     weather_data_C0Z100 = weather_data_C0Z100.add_suffix("_C0Z100")
-    weather_data_C0Z100.drop(columns=["# stno_C0Z100"], inplace=True)
 
     # find the closest yyyymmddhh to merge
     result_data = pd.merge_asof(
@@ -68,8 +74,9 @@ def openWeather(data):
     # find 466990
     weather_data_466990 = _openWeatherCSV("466990")
     weather_data_466990 = weather_data_466990.set_index("yyyymmddhh")
+    weather_data_466990.drop(columns=["# stno", "WD02", "WD07"], inplace=True)
+
     weather_data_466990 = weather_data_466990.add_suffix("_466990")
-    weather_data_466990.drop(columns=["# stno_466990"], inplace=True)
     # find the closest yyyymmddhh to merge
     result_data = pd.merge_asof(
         result_data.sort_values("yyyymmddhh"),
@@ -87,8 +94,8 @@ def openWeather(data):
 
     weather_data_72T250 = _openWeatherCSV("72T250")
     weather_data_72T250 = weather_data_72T250.set_index("yyyymmddhh")
+    weather_data_72T250.drop(columns=["# stno", "WD08", "PP01"], inplace=True)
     weather_data_72T250 = weather_data_72T250.add_suffix("_72T250")
-    weather_data_72T250.drop(columns=["# stno_72T250"], inplace=True)
     # find the closest yyyymmddhh to merge
     result_data = pd.merge_asof(
         result_data.sort_values("yyyymmddhh"),
@@ -114,6 +121,26 @@ def openWeather(data):
         weather_data_鳳林生豐站["DateTime"]
     )
     weather_data_鳳林生豐站 = weather_data_鳳林生豐站.set_index("DateTime")
+    weather_data_鳳林生豐站 = weather_data_鳳林生豐站.drop(
+        columns=[
+            "AirPress_Flag",
+            "Ta_Flag",
+            "RH_Flag",
+            "Pr_Flag",
+            "DSR_Flag",
+            "USR_Flag",
+            "DLR_Flag",
+            "ULR_Flag",
+            "WS_Flag",
+            "WD",
+            "WD_Flag",
+            "Ts_Flag",
+            "SWC_Flag",
+            "CO2_Flag",
+            "H_Flag",
+            "LE_Flag",
+        ]
+    )
     weather_data_鳳林生豐站 = weather_data_鳳林生豐站.add_suffix("_鳳林生豐站")
     # find the closest DateTime to merge within the same day and hour
     result_data = pd.merge_asof(
