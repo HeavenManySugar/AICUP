@@ -124,21 +124,21 @@ def PowerPredict(main_model_path, data):
         ]
     ].to_csv("Pweather_data.csv", index=False)
     # Calculate MAE for predicted weather data
-    # weather_columns = [
-    #     "Pressure(hpa)",
-    #     "WindSpeed(m/s)",
-    #     "Temperature(°C)",
-    #     "Sunlight(Lux)",
-    #     "Humidity(%)",
-    # ]
-
-    # mae_weather = {}
-    # for column in weather_columns:
-    #     original = SourceData.loc[SourceData["Serial"].isin(data["Serial"]), column]
-    #     predicted = data[column]
-    #     mae_weather[column] = mean_absolute_error(original, predicted)
-    #     print(f"Mean Absolute Error for {column}: {mae_weather[column]}")
-    #     print(f"誤差 for {column}: {mae_weather[column]/original.max()}")
+    mae_weather = {}
+    for column in [
+        "Pressure(hpa)",
+        "WindSpeed(m/s)",
+        "Temperature(°C)",
+        "Sunlight(Lux)",
+        "Humidity(%)",
+    ]:
+        original = SourceData.loc[SourceData["Serial"].isin(data["Serial"]), column]
+        predicted = data[column]
+        mae_weather[column] = mean_absolute_error(original, predicted)
+        r2_score = np.corrcoef(original, predicted)[0, 1] ** 2
+        print(f"Mean Absolute Error for {column}: {mae_weather[column]}")
+        print(f"誤差 for {column}: {mae_weather[column]/original.max()}")
+        print(f"R2 Score for {column}: {r2_score}")
 
     X = data[
         [
@@ -168,10 +168,10 @@ def PowerPredict(main_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
-    y_pred = PowerPredict("main_model_cat.joblib", data)
+    y_pred = PowerPredict("main_model.joblib", data)
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
