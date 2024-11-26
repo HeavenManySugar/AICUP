@@ -171,7 +171,7 @@ if __name__ == "__main__":
     csv_path = "upload(no answer).csv"
     data = pd.read_csv(csv_path)
 
-    y_pred = PowerPredict("main_model.joblib", data)
+    y_pred = PowerPredict("main_model_cat.joblib", data)
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
@@ -196,4 +196,4 @@ if __name__ == "__main__":
 
     # Save predictions to CSV
     output = pd.DataFrame({"序號": data["Serial"], "答案": y_pred})
-    output.to_csv("predictions.csv", index=False, encoding="utf-8", header=False)
+    output.to_csv("predictions_cat.csv", index=False, encoding="utf-8", header=False)
