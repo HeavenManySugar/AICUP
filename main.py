@@ -151,13 +151,13 @@ def PowerPredict(main_model_path, data):
             "DeviceID",
             # "day_of_year",
             "Pressure(hpa)",
-            "WindSpeed(m/s)",
+            # "WindSpeed(m/s)",
             "Temperature(°C)",
             "Sunlight(Lux)",
             "Humidity(%)",
             *weather_columns,
             "Pressure_850",
-            "WindSpeed_850",
+            # "WindSpeed_850",
             "Temperature_850",
             "Sunlight_850",
             "Humidity_850",
@@ -169,7 +169,7 @@ def PowerPredict(main_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
     y_pred = PowerPredict("main_model.joblib", data)
