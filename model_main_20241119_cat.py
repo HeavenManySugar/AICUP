@@ -180,4 +180,4 @@ print(f"Mean Absolute Error (MAE): {mae}")
 print(f"Root Mean Squared Error (RMSE): {rmse}")
 
 # Save the model
-joblib.dump(best_model, "main_model_cat.joblib")
+joblib.dump(best_model, "main_model.joblib")

@@ -304,6 +304,23 @@ def openWeather(data):
     for col in existing_columns_C0Z290:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
 
+    weather_data_鳳林生豐站 = pd.read_csv("20249999.鳳林生豐站.csv")
+    weather_data_鳳林生豐站["DateTime"] = pd.to_datetime(
+        weather_data_鳳林生豐站["DateTime"]
+    )
+    weather_data_鳳林生豐站 = weather_data_鳳林生豐站.set_index("DateTime")
+    weather_data_鳳林生豐站 = weather_data_鳳林生豐站.add_suffix("_鳳林生豐站")
+    # find the closest DateTime to merge within the same day and hour
+    result_data = pd.merge_asof(
+        result_data.sort_values("DateTime"),
+        weather_data_鳳林生豐站.sort_index(),
+        on="DateTime",
+        direction="nearest",
+        tolerance=pd.Timedelta("30min"),
+    )
+    existing_columns_鳳林生豐站 = weather_data_鳳林生豐站.columns
+    weather_columns = weather_columns + existing_columns_鳳林生豐站.tolist()
+
     # Restore the original order
     result_data = result_data.sort_values("original_index").drop(
         columns=["original_index"]

@@ -102,10 +102,10 @@ y_train_sub = y_train.loc[X_train_sub.index]
 
 def objective(trial):
     param = {
-        "iterations": trial.suggest_int("iterations", 500, 3000),
+        "iterations": trial.suggest_int("iterations", 2000, 5000),
         "depth": trial.suggest_int("depth", 4, 10),
-        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
-        "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1, 10),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3),
+        "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1, 100),
         "bagging_temperature": trial.suggest_float("bagging_temperature", 0.0, 1.0),
         "random_strength": trial.suggest_float("random_strength", 0.0, 1.0),
         "border_count": trial.suggest_int("border_count", 32, 255),
