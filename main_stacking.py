@@ -40,7 +40,7 @@ def PowerPredict(main_model_path, data):
     wind_speed_model = "wind_speed_model.joblib"
 
     data, weather_columns = openWeather(data)
-
+    data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
     # 打開參考資料
     SourceData = pd.read_csv("processed_data.csv")
     SourceData, weather_columns = openWeather(SourceData)
@@ -179,6 +179,11 @@ def PowerPredict(main_model_path, data):
             "minute",
             "DeviceID",
             # "day_of_year",
+            "_Pressure(hpa)",
+            "_WindSpeed(m/s)",
+            "_Temperature(°C)",
+            "_Sunlight(Lux)",
+            "_Humidity(%)",
             "Pressure(hpa)",
             "WindSpeed(m/s)",
             "Temperature(°C)",
@@ -201,7 +206,7 @@ if __name__ == "__main__":
     csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
-    y_pred = PowerPredict("main_model.joblib", data)
+    y_pred = PowerPredict("main_model_stacking.joblib", data)
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
@@ -226,4 +231,4 @@ if __name__ == "__main__":
 
     # Save predictions to CSV
     output = pd.DataFrame({"序號": data["Serial"], "答案": y_pred})
-    output.to_csv("predictions_cat.csv", index=False, encoding="utf-8", header=False)
+    output.to_csv("predictions.csv", index=False, encoding="utf-8", header=False)

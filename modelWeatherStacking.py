@@ -36,6 +36,8 @@ wind_speed_model = "wind_speed_model.joblib"
 # data["Sunlight(Lux)"] = weather_data[:, 3]
 # data["Humidity(%)"] = weather_data[:, 4]
 data, weather_columns = openWeather(data)
+data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
+
 
 data["Datetime"] = pd.to_datetime(
     data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
