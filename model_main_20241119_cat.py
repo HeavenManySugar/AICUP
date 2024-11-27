@@ -131,6 +131,7 @@ X = data[
     ]
 ]
 y = data["Power(mW)"]
+y = np.log1p(y)
 
 
 # Split data
