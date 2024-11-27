@@ -40,6 +40,7 @@ def PowerPredict(main_model_path, data):
     wind_speed_model = "wind_speed_model.joblib"
 
     data, weather_columns = openWeather(data)
+    data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
     # 打開參考資料
     SourceData = pd.read_csv("processed_data.csv")

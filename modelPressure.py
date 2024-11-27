@@ -59,6 +59,18 @@ data = pd.merge(
     suffixes=("", "_duplicate"),
 )
 
+# Drop rows with NaN values in the specified columns
+data.dropna(
+    subset=[
+        "Pressure_850",
+        "WindSpeed_850",
+        "Temperature_850",
+        "Sunlight_850",
+        "Humidity_850",
+    ],
+    inplace=True,
+)
+
 X = data[
     [
         # "Year",

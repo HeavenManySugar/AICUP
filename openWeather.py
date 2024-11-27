@@ -26,10 +26,6 @@ def pvWeather(data):
     ]
     tz = "Asia/Taipei"
 
-    # 保存原始索引並複製資料
-    data = data.copy()
-    data["original_index"] = data.index
-
     # 轉換時間和 DeviceID
     data["DateTime"] = pd.to_datetime(
         data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
@@ -87,11 +83,6 @@ def pvWeather(data):
     # 合併所有結果
     result_data = pd.concat(result_list)
 
-    # 恢復原始順序
-    result_data = result_data.sort_values("original_index").drop(
-        columns=["original_index"]
-    )
-
     print("合併後的資料筆數:", len(result_data))
     print("原始資料筆數:", len(data))
     print("樣本數據:")
@@ -99,17 +90,21 @@ def pvWeather(data):
     result_data = result_data.drop(
         columns=["DeviceID_x", "DeviceID_y"], errors="ignore"
     )
+
+    # 恢復原始順序
+    result_data = result_data.sort_values("original_index")
     print(result_data.head())
 
     return result_data
 
 
 def openWeather(data):
+    data["original_index"] = data.index
     data = pvWeather(data)
+    weather_columns = ["ghi", "dni", "dhi"]
     data["DateTime"] = pd.to_datetime(
         data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
     )
-    data["original_index"] = data.index
 
     weather_data_C0Z100 = pd.read_csv("C0Z100_2024.csv")
     weather_data_C0Z100.drop(
@@ -129,7 +124,7 @@ def openWeather(data):
         direction="nearest",
         tolerance=pd.Timedelta("1 hour"),
     )
-    weather_columns = weather_data_C0Z100.columns
+    weather_columns = weather_columns + weather_data_C0Z100.columns.tolist()
 
     existing_columns_C0Z100 = weather_data_C0Z100.columns
     # Convert columns to numeric types
@@ -170,7 +165,7 @@ def openWeather(data):
         tolerance=pd.Timedelta("1 hour"),
     )
     existing_columns_466990 = weather_data_466990.columns
-    weather_columns = weather_columns.tolist() + existing_columns_466990.tolist()
+    weather_columns = weather_columns + existing_columns_466990.tolist()
     # Convert columns to numeric types
     for col in existing_columns_466990:
         result_data[col] = pd.to_numeric(result_data[col], errors="coerce")
@@ -319,8 +314,9 @@ def openWeather(data):
 
 if __name__ == "__main__":
     data = pd.read_csv("processed_data.csv")
-    data = pvWeather(data)
     # data.columns = ["Serial", "Power(mW)"]
+
+    # data = pvWeather(data)
     result_data = openWeather(data)[0]
     print(result_data.head())
     # print(result_data.columns)

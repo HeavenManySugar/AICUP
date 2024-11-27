@@ -17,7 +17,6 @@ print(data.columns)
 data["Year"] = data["Serial"].astype(str).str[:4].astype(int)
 data["Month"] = data["Serial"].astype(str).str[4:6].astype(int)
 data["Day"] = data["Serial"].astype(str).str[6:8].astype(int)
-data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 data["Weekday"] = pd.to_datetime(data["Serial"].astype(str).str[:8]).dt.weekday
 
 # Load weather data
@@ -36,6 +35,7 @@ wind_speed_model = "wind_speed_model.joblib"
 # data["Sunlight(Lux)"] = weather_data[:, 3]
 # data["Humidity(%)"] = weather_data[:, 4]
 data, weather_columns = openWeather(data)
+data["DeviceID"] = data["Serial"].astype(str).str[12:14].astype(int)
 
 data["Datetime"] = pd.to_datetime(
     data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
@@ -78,6 +78,19 @@ data = pd.merge(
     how="left",
     suffixes=("", "_duplicate"),
 )
+
+# Drop rows with NaN values in the specified columns
+data.dropna(
+    subset=[
+        "Pressure_850",
+        "WindSpeed_850",
+        "Temperature_850",
+        "Sunlight_850",
+        "Humidity_850",
+    ],
+    inplace=True,
+)
+
 
 X = data[
     [
