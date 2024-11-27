@@ -106,7 +106,6 @@ def pvWeather(data):
 
 def openWeather(data):
     data = pvWeather(data)
-    return data, []
     data["DateTime"] = pd.to_datetime(
         data["Serial"].astype(str).str[:12], format="%Y%m%d%H%M"
     )
