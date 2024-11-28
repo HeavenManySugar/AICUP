@@ -127,6 +127,8 @@ X = data[
         "Temperature_850",
         "Sunlight_850",
         "Humidity_850",
+        "hualien_temperature",
+        "hualien_humidity",
     ]
 ]
 y = data[

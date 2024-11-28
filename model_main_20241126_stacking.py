@@ -109,6 +109,8 @@ X = data[
         "Temperature_850",
         "Sunlight_850",
         "Humidity_850",
+        "hualien_temperature",
+        "hualien_humidity",
     ]
 ]
 weather_data = joblib.load(weather_model).predict(X)
@@ -140,6 +142,8 @@ X = data[
         "Temperature_850",
         "Sunlight_850",
         "Humidity_850",
+        "hualien_temperature",
+        "hualien_humidity",
     ]
 ]
 y = data["Power(mW)"]
@@ -165,6 +169,7 @@ def objective(trial):
         "border_count": trial.suggest_int("border_count", 32, 255),
         "od_type": "Iter",
         "od_wait": 100,
+        # "task_type": "GPU",
     }
 
     model = CatBoostRegressor(**param)

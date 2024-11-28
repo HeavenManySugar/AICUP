@@ -79,10 +79,26 @@ def PowerPredict(main_model_path, data):
         "Humidity_850",
     ]
 
+    _data = SourceData[
+        [
+            "Serial",
+            "hualien_temperature",
+            "hualien_humidity",
+        ]
+    ]
+
     data = pd.merge(
         data,
         data_850,
         on=["DeviceID", "day_of_year"],
+        how="left",
+        suffixes=("", "_duplicate"),
+    )
+
+    data = pd.merge(
+        data,
+        _data,
+        on=["Serial"],
         how="left",
         suffixes=("", "_duplicate"),
     )
