@@ -118,19 +118,20 @@ X = data[
         "DeviceID",
         # "day_of_year",
         "Pressure(hpa)",
-        "WindSpeed(m/s)",
+        # "WindSpeed(m/s)",
         "Temperature(°C)",
         "Sunlight(Lux)",
         "Humidity(%)",
         *weather_columns,
         "Pressure_850",
-        "WindSpeed_850",
+        # "WindSpeed_850",
         "Temperature_850",
         "Sunlight_850",
         "Humidity_850",
     ]
 ]
 y = data["Power(mW)"]
+y = np.log1p(y)
 
 
 # Split data

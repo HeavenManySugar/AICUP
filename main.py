@@ -151,29 +151,29 @@ def PowerPredict(main_model_path, data):
             "DeviceID",
             # "day_of_year",
             "Pressure(hpa)",
-            "WindSpeed(m/s)",
+            # "WindSpeed(m/s)",
             "Temperature(°C)",
             "Sunlight(Lux)",
             "Humidity(%)",
             *weather_columns,
             "Pressure_850",
-            "WindSpeed_850",
+            # "WindSpeed_850",
             "Temperature_850",
             "Sunlight_850",
             "Humidity_850",
         ]
     ]
 
-    y_pred = main_model.predict(X)
+    y_pred = np.expm1(main_model.predict(X))
     return y_pred
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
     y_pred = PowerPredict("main_model.joblib", data)
-    y_pred = np.maximum(y_pred, 0)
+    # y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
         print(y_pred)
