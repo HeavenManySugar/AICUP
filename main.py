@@ -79,7 +79,23 @@ def PowerPredict(main_model_path, data):
         "Sunlight_850",
         "Humidity_850",
     ]
+    
+    data_1 = data[
+        [
+            "Serial",
+            "hualien_temperature",
+            "hualien_humidity",
+        ]
+    ]
 
+    data = pd.merge(
+        data,
+        data_1,
+        on=["Serial"],
+        how="left",
+        suffixes=("", "_duplicate"),
+    )
+    
     data = pd.merge(
         data,
         data_850,
@@ -140,7 +156,7 @@ def PowerPredict(main_model_path, data):
     #     print(f"Mean Absolute Error for {column}: {mae_weather[column]}")
     #     print(f"誤差 for {column}: {mae_weather[column]/original.max()}")
     #     print(f"R2 Score for {column}: {r2_score}")
-
+    print(data.columns)
     X = data[
         [
             # "Year",
@@ -160,7 +176,7 @@ def PowerPredict(main_model_path, data):
             # "WindSpeed_850",
             "Temperature_850",
             "Sunlight_850",
-            "Humidity_850",
+            "Humidity_850","hualien_temperature","hualien_humidity"
         ]
     ]
 
