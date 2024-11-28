@@ -4,6 +4,8 @@ from catboost import CatBoostRegressor
 import joblib
 from sklearn.model_selection import train_test_split,KFold
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 import joblib
 from openWeather import openWeather
@@ -161,7 +163,7 @@ for train_index, test_index in kf.split(X):
 
     def objective(trial):
         param = {
-            "iterations": trial.suggest_int("iterations", 500, 3000),
+            "iterations": trial.suggest_int("iterations", 500, 2000),
             "depth": trial.suggest_int("depth", 6, 10),
             "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
             "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1, 10),
@@ -187,6 +189,7 @@ for train_index, test_index in kf.split(X):
     best_params["task_type"] = "GPU"
     best_model = CatBoostRegressor(**best_params, verbose=0)
     best_model.fit(X_train, y_train)
+    # best_model.fit(X_train, y_train, eval_set=(X_test, y_test), verbose=0)
 
     y_pred = best_model.predict(X_test)
 
@@ -207,6 +210,17 @@ for train_index, test_index in kf.split(X):
 
     print(f"Fold MAE: {mae}")
     print(f"Fold RMSE: {rmse}")
+
+# # Plot learning curve
+# eval_results = final_model.get_evals_result()
+# plt.figure(figsize=(10, 5))
+# plt.plot(eval_results['learn']['RMSE'], label='Train RMSE')
+# plt.plot(eval_results['validation']['RMSE'], label='Validation RMSE')
+# plt.xlabel('Iterations')
+# plt.ylabel('RMSE')
+# plt.title('CatBoost Learning Curve')
+# plt.legend()
+# plt.show()
 
 # Print all results
 print(f"MAE: {mae_list}")
