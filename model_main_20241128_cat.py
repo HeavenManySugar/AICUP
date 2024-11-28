@@ -145,7 +145,7 @@ y = data["Power(mW)"]
 
 
 # Define the number of splits
-n_splits = 5
+n_splits = 20
 kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
 
 # Initialize lists to store the results
@@ -171,6 +171,7 @@ for train_index, test_index in kf.split(X):
             "od_type": "Iter",
             "od_wait": 100,
             "task_type": "GPU",
+            "verbose": 100,
         }
 
         model = CatBoostRegressor(**param)
@@ -184,7 +185,7 @@ for train_index, test_index in kf.split(X):
 
     best_params = study.best_params
     best_params["task_type"] = "GPU"
-    best_model = CatBoostRegressor(**best_params)
+    best_model = CatBoostRegressor(**best_params, verbose=0)
     best_model.fit(X_train, y_train)
 
     y_pred = best_model.predict(X_test)
@@ -195,6 +196,8 @@ for train_index, test_index in kf.split(X):
 
     mae_list.append(mae)
     rmse_list.append(rmse)
+
+    print(f"Current Fold: {len(mae_list)}")
 
     if mae < final_mae:
         final_mae = mae
@@ -213,7 +216,7 @@ print(f"Final MAE: {final_mae}")
 print(f"Final RMSE: {final_rmse}")
 
 #current time
-current_time = time.strftime("%m%d_%H%M")
+current_time = time.strftime("%m%d%H%M")
 
 # Save the final model
-joblib.dump(final_model, f"main_model_cat_{current_time}.joblib")
+joblib.dump(final_model, f"main_model_{current_time}.joblib")
