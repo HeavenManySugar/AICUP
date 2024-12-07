@@ -1,0 +1,10 @@
+pandas
+numpy<=2.0.0
+scikit-learn
+joblib
+catboost
+optuna
+tqdm
+xgboost
+pycaret
+jupyter
