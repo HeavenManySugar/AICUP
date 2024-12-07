@@ -170,9 +170,10 @@ def PowerPredict(main_model_path, data):
 
 if __name__ == "__main__":
     csv_path = "upload(no answer).csv"
+    # csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
-    y_pred = PowerPredict("main_model.joblib", data)
+    y_pred = PowerPredict("main_model_11281346.joblib", data)
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
