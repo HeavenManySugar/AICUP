@@ -87,7 +87,7 @@ def PowerPredict(main_model_path, data):
         how="left",
         suffixes=("", "_duplicate"),
     )
-    print(data.head())
+    # print(data.head())
 
     X = data[
         [
@@ -114,16 +114,16 @@ def PowerPredict(main_model_path, data):
     data["Humidity(%)"] = joblib.load(humidity_model).predict(X)
 
     # 輸出預測出來的天氣
-    data[
-        [
-            "Serial",
-            "WindSpeed(m/s)",
-            "Pressure(hpa)",
-            "Temperature(°C)",
-            "Humidity(%)",
-            "Sunlight(Lux)",
-        ]
-    ].to_csv("Pweather_data.csv", index=False)
+    # data[
+    #     [
+    #         "Serial",
+    #         "WindSpeed(m/s)",
+    #         "Pressure(hpa)",
+    #         "Temperature(°C)",
+    #         "Humidity(%)",
+    #         "Sunlight(Lux)",
+    #     ]
+    # ].to_csv("Pweather_data.csv", index=False)
     # Calculate MAE for predicted weather data
     # mae_weather = {}
     # for column in [
@@ -169,7 +169,7 @@ def PowerPredict(main_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload(no answer).csv"
+    csv_path = "upload.csv"
     # csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     y_pred = np.maximum(y_pred, 0)
     y_pred = np.round(y_pred, 2)
     try:
-        print(y_pred)
+        # print(y_pred)
         processed_data = pd.read_csv("processed_data.csv")
         y_test = processed_data.loc[processed_data["Serial"].isin(data["Serial"])][
             "Power(mW)"

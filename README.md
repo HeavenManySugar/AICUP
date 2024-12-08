@@ -1,5 +1,6 @@
 # AICUP
 
+[Training Documentation](training.md)
 
 # Solar Power Prediction Model
 This project aims to predict solar power generation using machine learning techniques. It leverages historical data and meteorological information to forecast solar power output accurately.

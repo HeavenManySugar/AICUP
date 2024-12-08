@@ -83,9 +83,9 @@ def pvWeather(data):
     # 合併所有結果
     result_data = pd.concat(result_list)
 
-    print("合併後的資料筆數:", len(result_data))
-    print("原始資料筆數:", len(data))
-    print("樣本數據:")
+    # print("合併後的資料筆數:", len(result_data))
+    # print("原始資料筆數:", len(data))
+    # print("樣本數據:")
 
     result_data = result_data.drop(
         columns=["DeviceID_x", "DeviceID_y"], errors="ignore"
@@ -93,7 +93,7 @@ def pvWeather(data):
 
     # 恢復原始順序
     result_data = result_data.sort_values("original_index")
-    print(result_data.head())
+    # print(result_data.head())
 
     return result_data
 
