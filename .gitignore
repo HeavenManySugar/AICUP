@@ -1,3 +1,6 @@
+# catboost
+catboost_info/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -188,3 +191,5 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+trained_models/
