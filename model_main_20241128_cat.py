@@ -2,7 +2,7 @@ import pandas as pd
 import xgboost as xgb
 from catboost import CatBoostRegressor
 import joblib
-from sklearn.model_selection import train_test_split,KFold
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -196,7 +196,6 @@ for train_index, test_index in kf.split(X):
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 
-
     mae_list.append(mae)
     rmse_list.append(rmse)
 
@@ -206,7 +205,6 @@ for train_index, test_index in kf.split(X):
         final_mae = mae
         final_rmse = rmse
         final_model = best_model
-
 
     print(f"Fold MAE: {mae}")
     print(f"Fold RMSE: {rmse}")
@@ -229,7 +227,7 @@ print(f"RMSE: {rmse_list}")
 print(f"Final MAE: {final_mae}")
 print(f"Final RMSE: {final_rmse}")
 
-#current time
+# current time
 current_time = time.strftime("%m%d%H%M")
 
 # Save the final model
