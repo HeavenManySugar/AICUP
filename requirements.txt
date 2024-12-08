@@ -4,7 +4,5 @@ scikit-learn
 joblib
 catboost
 optuna
-tqdm
 xgboost
-pycaret
-jupyter
+pvlib
