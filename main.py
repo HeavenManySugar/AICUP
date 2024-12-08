@@ -169,7 +169,7 @@ def PowerPredict(main_model_path, data):
 
 
 if __name__ == "__main__":
-    csv_path = "upload.csv"
+    csv_path = "upload(no answer).csv"
     # csv_path = "upload.csv"
     data = pd.read_csv(csv_path)
 
